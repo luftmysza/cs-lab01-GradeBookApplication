@@ -121,17 +121,19 @@ namespace GradeBook.GradeBooks
             switch (letterGrade)
             {
                 case 'A':
-                    return points + 4;
+                    points += 4; break;
                 case 'B':
-                    return points + 3;
+                    points += 3; break;
                 case 'C':
-                    return points + 2;
+                    points += 2; break;
                 case 'D':
-                    return points + 1;
+                    points += 1; break;
                 case 'F':
-                    return points;
+                    break;
             }
-            return points;
+            if (!this.IsWeighted) return points > 4 ? 4 : points;
+            if (this.IsWeighted) return points;
+            return 0;
         }
 
         public virtual void CalculateStatistics()
@@ -148,7 +150,7 @@ namespace GradeBook.GradeBooks
             foreach (var student in Students)
             {
                 student.LetterGrade = GetLetterGrade(student.AverageGrade);
-                if(IsWeighted == true) student.GPA = GetGPA(student.LetterGrade, student.Type);
+                student.GPA = GetGPA(student.LetterGrade, student.Type);
 
                 Console.WriteLine("{0} ({1}:{2}) GPA: {3}.", student.Name, student.LetterGrade, student.AverageGrade, student.GPA);
                 allStudentsPoints += student.AverageGrade;
@@ -205,7 +207,7 @@ namespace GradeBook.GradeBooks
         {
             var student = Students.FirstOrDefault(e => e.Name == name);
             student.LetterGrade = GetLetterGrade(student.AverageGrade);
-            if (IsWeighted == true) student.GPA = GetGPA(student.LetterGrade, student.Type);
+            student.GPA = GetGPA(student.LetterGrade, student.Type);
 
             Console.WriteLine("{0} ({1}:{2}) GPA: {3}.", student.Name, student.LetterGrade, student.AverageGrade, student.GPA);
             Console.WriteLine();
