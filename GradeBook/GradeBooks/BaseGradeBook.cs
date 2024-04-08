@@ -6,19 +6,26 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Drawing;
+using System.Reflection;
 
 namespace GradeBook.GradeBooks
 {
-    public class BaseGradeBook
+    public abstract class BaseGradeBook
     {
         public string Name { get; set; }
         public List<Student> Students { get; set; }
 
-        public BaseGradeBook(string name)
+        public BaseGradeBook(string name, bool isWeighted)
         {
             Name = name;
             Students = new List<Student>();
+            IsWeighted = isWeighted;
         }
+
+        public GradeBookType Type { get; set; }
+
+        public bool IsWeighted { get; set; }
 
         public void AddStudent(Student student)
         {
@@ -106,20 +113,25 @@ namespace GradeBook.GradeBooks
 
         public virtual double GetGPA(char letterGrade, StudentType studentType)
         {
+            int points = 0;
+
+            if (studentType == StudentType.Honors) points++;
+            if (studentType == StudentType.DualEnrolled) points++;
+
             switch (letterGrade)
             {
                 case 'A':
-                    return 4;
+                    return points + 4;
                 case 'B':
-                    return 3;
+                    return points + 3;
                 case 'C':
-                    return 2;
+                    return points + 2;
                 case 'D':
-                    return 1;
+                    return points + 1;
                 case 'F':
-                    return 0;
+                    return points;
             }
-            return 0;
+            return points;
         }
 
         public virtual void CalculateStatistics()
@@ -136,7 +148,7 @@ namespace GradeBook.GradeBooks
             foreach (var student in Students)
             {
                 student.LetterGrade = GetLetterGrade(student.AverageGrade);
-                student.GPA = GetGPA(student.LetterGrade, student.Type);
+                if(IsWeighted == true) student.GPA = GetGPA(student.LetterGrade, student.Type);
 
                 Console.WriteLine("{0} ({1}:{2}) GPA: {3}.", student.Name, student.LetterGrade, student.AverageGrade, student.GPA);
                 allStudentsPoints += student.AverageGrade;
@@ -193,7 +205,7 @@ namespace GradeBook.GradeBooks
         {
             var student = Students.FirstOrDefault(e => e.Name == name);
             student.LetterGrade = GetLetterGrade(student.AverageGrade);
-            student.GPA = GetGPA(student.LetterGrade, student.Type);
+            if (IsWeighted == true) student.GPA = GetGPA(student.LetterGrade, student.Type);
 
             Console.WriteLine("{0} ({1}:{2}) GPA: {3}.", student.Name, student.LetterGrade, student.AverageGrade, student.GPA);
             Console.WriteLine();
